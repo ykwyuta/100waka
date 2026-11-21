@@ -18,6 +18,8 @@ let poems;
 let reading;
 let finished;
 
+const poemArt = (index) => `./art/${String(index + 1).padStart(3, "0")}.webp`;
+
 function verse() {
   return document.querySelector('input[name="verse"]:checked').value;
 }
@@ -136,8 +138,7 @@ function renderQuestion(focus = true) {
     art.width = 224;
     art.height = 224;
     art.draggable = false;
-    const poemNumber = String(wasm.game_choice(index) + 1).padStart(3, "0");
-    art.src = `./art/${poemNumber}.webp`;
+    art.src = poemArt(wasm.game_choice(index));
     const text = document.createElement("span");
     text.className = "card-text";
     const mark = document.createElement("span");
@@ -193,13 +194,117 @@ try {
   if (!response.ok) throw new Error(`WASM: ${response.status}`);
   const { instance } = await WebAssembly.instantiate(await response.arrayBuffer());
   wasm = instance.exports;
-  const buffer = new Uint8Array(wasm.memory.buffer, wasm.poems_ptr(), wasm.poems_len());
-  poems = new TextDecoder().decode(buffer).trimEnd().split("\n").map((line) => line.split("\t"));
+  poems = readRows(wasm.poems_ptr(), wasm.poems_len());
+  setupCatalog(readRows(wasm.catalog_ptr(), wasm.catalog_len()));
   newDeck();
   renderQuestion(false);
   byId("loading").hidden = true;
+  byId("views").hidden = false;
   game.hidden = false;
 } catch (error) {
   console.error(error);
   byId("loading").textContent = "ゲームを ひらけなかったよ。ページを もういちど ひらいてね。";
+}
+
+function readRows(pointer, length) {
+  const bytes = new Uint8Array(wasm.memory.buffer, pointer, length);
+  return new TextDecoder().decode(bytes).trimEnd().split("\n").map((line) => line.split("\t"));
+}
+
+function setupCatalog(entries) {
+  const catalog = byId("catalog");
+  const showGame = byId("show-game");
+  const showCatalog = byId("show-catalog");
+  const search = byId("catalog-search");
+  const picker = byId("catalog-entry");
+  const previous = byId("catalog-prev");
+  const following = byId("catalog-next");
+  const detail = byId("catalog-detail");
+  const art = byId("catalog-art");
+  const creditedPortraits = new Set([1, 2, 7, 9, 24, 57, 62, 86, 97]);
+  let matches = [];
+  let selected = 0;
+
+  function normalize(value) {
+    return value.normalize("NFKC").replace(/\s+/gu, "")
+      .replace(/[ァ-ヶ]/gu, (letter) => String.fromCharCode(letter.charCodeAt(0) - 0x60));
+  }
+
+  const searchText = entries.map(([name, reading, , profile], index) => (
+    normalize([name, reading, ...poems[index], profile].join(" "))
+  ));
+
+  function renderEntry() {
+    const position = matches.indexOf(selected);
+    detail.hidden = position < 0;
+    previous.disabled = position <= 0;
+    following.disabled = position < 0 || position === matches.length - 1;
+    if (position < 0) return;
+
+    picker.value = String(selected);
+    const [name, reading, portrait, profile, meaning] = entries[selected];
+    const poemMode = document.querySelector('input[name="catalog-mode"]:checked').value === "poem";
+    const pronunciation = document.createElement("rt");
+    pronunciation.textContent = reading;
+    byId("catalog-name").replaceChildren(document.createTextNode(name), pronunciation);
+    art.src = poemMode ? poemArt(selected) : `./portraits/${portrait}.webp`;
+    byId("catalog-caption").textContent = poemMode ? "うたの じょうけい"
+      : creditedPortraits.has(selected + 1) ? "歌人の イメージ"
+      : "時代や くらしの イメージ";
+    const verse = byId("catalog-verse");
+    verse.hidden = !poemMode;
+    verse.textContent = poems[selected].slice(0, 2).join("\n");
+    byId("catalog-kana").hidden = !poemMode;
+    byId("catalog-reading").textContent = poems[selected].slice(2).join("\n");
+    byId("catalog-description").textContent = poemMode ? meaning : profile;
+  }
+
+  function filterEntries() {
+    const query = normalize(search.value);
+    const number = /^[0-9]+$/.test(query) ? Number(query) : null;
+    matches = searchText.flatMap((contents, index) => {
+      const match = number === null ? contents.includes(query) : number === index + 1;
+      return match ? [index] : [];
+    });
+    if (!matches.includes(selected)) selected = matches[0] ?? selected;
+    picker.replaceChildren(...matches.map((index) => {
+      const item = document.createElement("option");
+      item.value = String(index);
+      item.textContent = `${index + 1}ばん　${entries[index][0]}`;
+      return item;
+    }));
+    picker.disabled = matches.length === 0;
+    byId("catalog-count").textContent = matches.length ? `${matches.length}けん` : "みつからなかったよ。";
+    renderEntry();
+  }
+
+  function openCatalog(open) {
+    game.hidden = open;
+    catalog.hidden = !open;
+    showCatalog.setAttribute("aria-pressed", String(open));
+    showGame.setAttribute("aria-pressed", String(!open));
+    if (open) {
+      stopReading();
+      renderEntry();
+    }
+  }
+
+  function move(offset) {
+    const index = matches[matches.indexOf(selected) + offset];
+    if (index === undefined) return;
+    selected = index;
+    renderEntry();
+  }
+
+  showCatalog.addEventListener("click", () => openCatalog(true));
+  showGame.addEventListener("click", () => openCatalog(false));
+  search.addEventListener("input", filterEntries);
+  picker.addEventListener("change", () => {
+    selected = Number(picker.value);
+    renderEntry();
+  });
+  catalog.querySelector(".catalog-modes").addEventListener("change", renderEntry);
+  previous.addEventListener("click", () => move(-1));
+  following.addEventListener("click", () => move(1));
+  filterEntries();
 }

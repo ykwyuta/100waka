@@ -19,6 +19,11 @@
       <div class="blossom" aria-hidden="true">✿</div>
     </header>
 
+    <nav id="views" class="views" aria-label="あそびかた" hidden>
+      <button id="show-game" type="button" aria-controls="game" aria-pressed="true">かるた</button>
+      <button id="show-catalog" type="button" aria-controls="catalog" aria-pressed="false">ずかん</button>
+    </nav>
+
     <section id="game" aria-label="かるたあそび" hidden>
       <div class="settings">
         <fieldset>
@@ -59,6 +64,42 @@
         <p id="summary-detail"></p>
         <button id="continue" class="action" type="button"></button>
       </section>
+    </section>
+    <section id="catalog" class="catalog" aria-labelledby="catalog-title" hidden>
+      <h2 id="catalog-title">百人一首ずかん</h2>
+      <fieldset class="catalog-modes">
+        <legend>なにを みる？</legend>
+        <label><input type="radio" name="catalog-mode" value="author" checked><span>かじん</span></label>
+        <label><input type="radio" name="catalog-mode" value="poem"><span>うたの いみ</span></label>
+      </fieldset>
+
+      <div class="catalog-picker">
+        <label for="catalog-search">さがす</label>
+        <input id="catalog-search" type="search" placeholder="なまえ・うた・ばんごう" autocomplete="off">
+        <label for="catalog-entry">ばんごうと なまえ</label>
+        <select id="catalog-entry"></select>
+        <p id="catalog-count" role="status"></p>
+      </div>
+
+      <article id="catalog-detail" class="catalog-detail">
+        <figure>
+          <img id="catalog-art" width="448" height="448" alt="">
+          <figcaption id="catalog-caption"></figcaption>
+        </figure>
+        <div>
+          <h3><ruby id="catalog-name"></ruby></h3>
+          <p id="catalog-verse"></p>
+          <details id="catalog-kana">
+            <summary>ひらがなで よむ</summary>
+            <p id="catalog-reading"></p>
+          </details>
+          <p id="catalog-description"></p>
+        </div>
+      </article>
+      <div class="catalog-paging">
+        <button id="catalog-prev" type="button">まえ</button>
+        <button id="catalog-next" type="button">つぎ</button>
+      </div>
     </section>
     <p id="loading" role="status">じゅんび しているよ…</p>
     <noscript>あそぶには、ブラウザーで JavaScript をオンにしてね。</noscript>

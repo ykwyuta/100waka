@@ -6,6 +6,10 @@
   <meta name="description" content="上の句を聞いて、3枚の札からえらぶ百人一首の練習ゲーム。">
   <meta name="theme-color" content="#173d37">
   <title>きいて、とろう！ 百人一首</title>
+  <link rel="icon" href="./favicon.ico" sizes="48x48">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./style.css">
   <script type="module" src="./app.js"></script>
 </head>
@@ -88,6 +92,8 @@
         </figure>
         <div>
           <h3><ruby id="catalog-name"></ruby></h3>
+          <button id="catalog-listen" class="action" type="button"><span aria-hidden="true">♫</span> うたを きく</button>
+          <p id="catalog-audio-status" role="status"></p>
           <p id="catalog-verse"></p>
           <details id="catalog-kana">
             <summary>ひらがなで よむ</summary>

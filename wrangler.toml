@@ -1,0 +1,8 @@
+name = "100waka"
+compatibility_date = "2026-11-20"
+
+[build]
+command = "bash scripts/build-web.sh"
+
+[assets]
+directory = "./dist"

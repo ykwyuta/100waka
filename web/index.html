@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="上の句を聞いて、3枚の札からえらぶ百人一首の練習ゲーム。">
+  <meta name="theme-color" content="#173d37">
+  <title>きいて、とろう！ 百人一首</title>
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <div class="title">
+        <p>きいて、とろう！</p>
+        <h1>百人一首<span>ひゃくにんいっしゅ</span></h1>
+      </div>
+      <div class="blossom" aria-hidden="true">✿</div>
+    </header>
+
+    <section id="game" aria-label="かるたあそび" hidden>
+      <div class="settings">
+        <fieldset>
+          <legend>えらぶ ふだ</legend>
+          <label><input type="radio" name="verse" value="upper" checked><span>かみのく</span></label>
+          <label><input type="radio" name="verse" value="lower"><span>しものく</span></label>
+        </fieldset>
+        <fieldset>
+          <legend>ふだの もじ</legend>
+          <label><input type="radio" name="script" value="kana" checked><span>ひらがな</span></label>
+          <label><input type="radio" name="script" value="kanji"><span>かんじあり</span></label>
+        </fieldset>
+      </div>
+
+      <div id="play" class="play">
+        <div class="progress-row">
+          <span id="progress-text"></span>
+          <div id="progress-dots" class="progress-dots" aria-hidden="true"></div>
+          <span id="stars" class="stars"></span>
+        </div>
+        <div class="listen">
+          <h2 id="instruction">かみのくを きいて、おなじ ふだを とろう</h2>
+          <button id="listen" type="button"><span aria-hidden="true">♫</span> よみあげを きく</button>
+          <button id="hint" class="text-button" type="button" aria-expanded="false" aria-controls="prompt">もじで みる</button>
+          <p id="prompt" hidden></p>
+          <p id="audio-status" role="status"></p>
+        </div>
+        <div id="cards" class="cards" aria-label="3まいの ふだ"></div>
+        <div class="response">
+          <p id="feedback" role="status"></p>
+          <button id="next" class="action" type="button" hidden>つぎの もんだい</button>
+        </div>
+      </div>
+
+      <section id="summary" class="summary" aria-labelledby="summary-title" hidden>
+        <span aria-hidden="true">✿</span>
+        <h2 id="summary-title" tabindex="-1"></h2>
+        <p id="summary-detail"></p>
+        <button id="continue" class="action" type="button"></button>
+      </section>
+    </section>
+    <p id="loading" role="status">じゅんび しているよ…</p>
+    <noscript>あそぶには、ブラウザーで JavaScript をオンにしてね。</noscript>
+  </main>
+</body>
+</html>

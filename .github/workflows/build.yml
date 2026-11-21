@@ -1,0 +1,19 @@
+name: Build and test
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: cargo test --locked
+      - run: bash scripts/build-web.sh
+      - uses: actions/upload-artifact@v7
+        with:
+          name: 100waka-web
+          path: dist/
+          if-no-files-found: error

@@ -13,9 +13,11 @@ const summaryTitle = byId("summary-title");
 const continueButton = byId("continue");
 
 const ROUND_SIZE = 10;
+const VOICES = ["zundamon", "metan", "tsumugi"];
 let wasm;
 let poems;
 let reading;
+let voice;
 let finished;
 
 const poemArt = (index) => `./art/${String(index + 1).padStart(3, "0")}.webp`;
@@ -53,8 +55,8 @@ function showHint(visible) {
 }
 
 function stopReading() {
+  reading?.pause();
   reading = undefined;
-  window.speechSynthesis?.cancel();
 }
 
 function audioUnavailable() {
@@ -62,31 +64,25 @@ function audioUnavailable() {
   showHint(true);
 }
 
-function readAloud() {
-  const synth = window.speechSynthesis;
-  if (!synth || !window.SpeechSynthesisUtterance) {
-    audioUnavailable();
-    return;
-  }
+function playVoice(index, half, onFail) {
   stopReading();
   audioStatus.textContent = "";
-  const spoken = poems[wasm.game_answer()][2].replaceAll("　", "、");
-  const utterance = new SpeechSynthesisUtterance(spoken);
-  utterance.lang = "ja-JP";
-  const voice = synth.getVoices().find((item) => /^ja(?:[-_]|$)/i.test(item.lang));
-  if (voice) utterance.voice = voice;
-  utterance.rate = 0.78;
-  utterance.onerror = () => {
-    if (reading === utterance) {
-      reading = undefined;
-      audioUnavailable();
-    }
+  const audio = new Audio(`./voice/${voice}/${String(index + 1).padStart(3, "0")}-${half}.mp3`);
+  reading = audio;
+  const fail = () => {
+    if (reading !== audio) return;
+    reading = undefined;
+    onFail?.();
   };
-  utterance.onend = () => {
-    if (reading === utterance) reading = undefined;
-  };
-  reading = utterance;
-  synth.speak(utterance);
+  audio.addEventListener("error", fail);
+  audio.addEventListener("ended", () => {
+    if (reading === audio) reading = undefined;
+  });
+  audio.play().catch(fail);
+}
+
+function readAloud() {
+  playVoice(wasm.game_answer(), "kami", audioUnavailable);
 }
 
 function updateStars() {
@@ -94,6 +90,7 @@ function updateStars() {
 }
 
 function chooseCard(index, card) {
+  if (verse() === "lower") playVoice(wasm.game_choice(index), "shimo");
   const result = wasm.game_choose(index);
   if (result === 0) return;
   const mark = card.querySelector(".card-mark");
@@ -128,6 +125,7 @@ function renderQuestion(focus = true) {
     return dot;
   }));
   updateStars();
+  voice = VOICES[crypto.getRandomValues(new Uint32Array(1))[0] % VOICES.length];
   cards.replaceChildren(...Array.from({ length: 3 }, (_, index) => {
     const card = document.createElement("button");
     card.type = "button";

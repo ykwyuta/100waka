@@ -105,9 +105,11 @@ label input:checked + span { background: var(--ink); border-color: var(--ink); c
 .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(.4rem, 2vw, 1.1rem); }
 .card {
   display: grid;
-  place-items: center;
-  min-height: clamp(12rem, 35vw, 15.5rem);
-  padding: .55rem .2rem;
+  grid-template-rows: auto minmax(clamp(10.5rem, 23vw, 14rem), 1fr) 1.25rem;
+  justify-items: center;
+  align-items: center;
+  gap: .55rem;
+  padding: clamp(.3rem, 1.2vw, .75rem);
   background: #fffef6;
   color: var(--ink);
   border: 4px double #8eaa93;
@@ -115,6 +117,15 @@ label input:checked + span { background: var(--ink); border-color: var(--ink); c
   box-shadow: 0 .28rem 0 #c6b48f;
 }
 .card:not([aria-disabled="true"]):hover { border-color: #a13736; background: #fff1d2; }
+.card-art {
+  display: block;
+  width: min(100%, 10rem);
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: .35rem;
+  background: #f4e8cc;
+}
 .card-text {
   writing-mode: vertical-rl;
   white-space: nowrap;

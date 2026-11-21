@@ -227,3 +227,10 @@ label input:checked + span { background: var(--ink); border-color: var(--ink); c
   .catalog-detail { grid-template-columns: 1fr; }
   .catalog-detail figure { width: min(100%, 11rem); }
 }
+
+.voice-credit {
+  margin: 24px 0 0;
+  font-size: 0.75rem;
+  text-align: center;
+  opacity: 0.7;
+}

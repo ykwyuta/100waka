@@ -165,7 +165,7 @@ mod tests {
         assert_eq!(CATALOG.lines().count(), COUNT);
         for row in CATALOG.lines() {
             let columns: Vec<_> = row.split('\t').collect();
-            assert_eq!(columns.len(), 5);
+            assert_eq!(columns.len(), 7);
             assert!(columns.iter().all(|column| !column.trim().is_empty()));
             assert!(names.insert(columns[0]));
             assert_eq!(columns[2].len(), 2);

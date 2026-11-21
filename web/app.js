@@ -250,7 +250,7 @@ function setupCatalog(entries) {
     if (position < 0) return;
 
     picker.value = String(selected);
-    const [name, reading, portrait, profile, meaning] = entries[selected];
+    const [name, reading, portrait, profile, meaning, words, notes] = entries[selected];
     const poemMode = document.querySelector('input[name="catalog-mode"]:checked').value === "poem";
     const pronunciation = document.createElement("rt");
     pronunciation.textContent = reading;
@@ -264,7 +264,20 @@ function setupCatalog(entries) {
     verse.textContent = poems[selected].slice(0, 2).join("\n");
     byId("catalog-kana").hidden = !poemMode;
     byId("catalog-reading").textContent = poems[selected].slice(2).join("\n");
-    byId("catalog-description").textContent = poemMode ? meaning : profile;
+    const description = byId("catalog-description");
+    description.hidden = poemMode;
+    description.textContent = profile;
+    byId("catalog-commentary").hidden = !poemMode;
+    byId("catalog-meaning").textContent = meaning;
+    byId("catalog-words").replaceChildren(...words.split("／").flatMap((item) => {
+      const [word, ...rest] = item.split("：");
+      const term = document.createElement("dt");
+      term.textContent = word;
+      const detail = document.createElement("dd");
+      detail.textContent = rest.join("：");
+      return [term, detail];
+    }));
+    byId("catalog-notes").textContent = notes;
   }
 
   function filterEntries() {
@@ -297,6 +310,11 @@ function setupCatalog(entries) {
 
   byId("catalog-listen").addEventListener("click", () => {
     playVoice(selected, ["kami", "shimo"], () => {
+      byId("catalog-audio-status").textContent = "おとが でないときは、もじで よんでね。";
+    }, randomVoice());
+  });
+  byId("catalog-explain").addEventListener("click", () => {
+    playVoice(selected, ["kaisetsu"], () => {
       byId("catalog-audio-status").textContent = "おとが でないときは、もじで よんでね。";
     }, randomVoice());
   });

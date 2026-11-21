@@ -221,6 +221,21 @@ label input:checked + span { background: var(--ink); border-color: var(--ink); c
 #catalog-listen span { color: var(--yellow); padding-right: .25rem; }
 #catalog-audio-status:empty { display: none; }
 #catalog-verse { font-weight: 700; white-space: pre-line; }
+.catalog-commentary h4 {
+  margin: 1rem 0 0;
+  padding-left: .5rem;
+  border-left: 4px solid var(--rust);
+  font-size: .95rem;
+}
+.catalog-commentary .text-button { margin: .8rem 0 0; }
+.catalog-commentary .text-button span { color: var(--rust); padding-right: .25rem; }
+#catalog-words { margin: .5rem 0 0; display: grid; grid-template-columns: max-content 1fr; gap: .35rem .8rem; line-height: 1.6; }
+#catalog-words dt { font-weight: 700; }
+#catalog-words dd { margin: 0; }
+@media (max-width: 34rem) {
+  #catalog-words { grid-template-columns: 1fr; gap: 0; }
+  #catalog-words dd { margin-bottom: .45rem; }
+}
 #catalog-kana { margin-top: .5rem; }
 #catalog-kana summary { cursor: pointer; }
 #catalog-reading { white-space: pre-line; }

@@ -217,6 +217,9 @@ label input:checked + span { background: var(--ink); border-color: var(--ink); c
 #catalog-caption { margin-top: .35rem; font-size: .88rem; }
 .catalog-detail h3 { margin: .35rem 0 0; overflow-wrap: anywhere; }
 .catalog-detail p { margin: .7rem 0 0; line-height: 1.75; }
+#catalog-listen { margin-top: .7rem; }
+#catalog-listen span { color: var(--yellow); padding-right: .25rem; }
+#catalog-audio-status:empty { display: none; }
 #catalog-verse { font-weight: 700; white-space: pre-line; }
 #catalog-kana { margin-top: .5rem; }
 #catalog-kana summary { cursor: pointer; }

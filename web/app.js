@@ -64,10 +64,16 @@ function audioUnavailable() {
   showHint(true);
 }
 
-function playVoice(index, half, onFail) {
+function randomVoice() {
+  return VOICES[crypto.getRandomValues(new Uint32Array(1))[0] % VOICES.length];
+}
+
+// halves を順に読み上げる（例: ["kami", "shimo"] で一首まるごと）。
+function playVoice(index, halves, onFail, speaker = voice) {
   stopReading();
   audioStatus.textContent = "";
-  const audio = new Audio(`./voice/${voice}/${String(index + 1).padStart(3, "0")}-${half}.mp3`);
+  const [half, ...rest] = halves;
+  const audio = new Audio(`./voice/${speaker}/${String(index + 1).padStart(3, "0")}-${half}.mp3`);
   reading = audio;
   const fail = () => {
     if (reading !== audio) return;
@@ -76,13 +82,15 @@ function playVoice(index, half, onFail) {
   };
   audio.addEventListener("error", fail);
   audio.addEventListener("ended", () => {
-    if (reading === audio) reading = undefined;
+    if (reading !== audio) return;
+    reading = undefined;
+    if (rest.length) playVoice(index, rest, onFail, speaker);
   });
   audio.play().catch(fail);
 }
 
 function readAloud() {
-  playVoice(wasm.game_answer(), "kami", audioUnavailable);
+  playVoice(wasm.game_answer(), ["kami"], audioUnavailable);
 }
 
 function updateStars() {
@@ -90,7 +98,7 @@ function updateStars() {
 }
 
 function chooseCard(index, card) {
-  if (verse() === "lower") playVoice(wasm.game_choice(index), "shimo");
+  if (verse() === "lower") playVoice(wasm.game_choice(index), ["shimo"]);
   const result = wasm.game_choose(index);
   if (result === 0) return;
   const mark = card.querySelector(".card-mark");
@@ -125,7 +133,7 @@ function renderQuestion(focus = true) {
     return dot;
   }));
   updateStars();
-  voice = VOICES[crypto.getRandomValues(new Uint32Array(1))[0] % VOICES.length];
+  voice = randomVoice();
   cards.replaceChildren(...Array.from({ length: 3 }, (_, index) => {
     const card = document.createElement("button");
     card.type = "button";
@@ -233,6 +241,8 @@ function setupCatalog(entries) {
   ));
 
   function renderEntry() {
+    stopReading();
+    byId("catalog-audio-status").textContent = "";
     const position = matches.indexOf(selected);
     detail.hidden = position < 0;
     previous.disabled = position <= 0;
@@ -281,11 +291,15 @@ function setupCatalog(entries) {
     catalog.hidden = !open;
     showCatalog.setAttribute("aria-pressed", String(open));
     showGame.setAttribute("aria-pressed", String(!open));
-    if (open) {
-      stopReading();
-      renderEntry();
-    }
+    stopReading();
+    if (open) renderEntry();
   }
+
+  byId("catalog-listen").addEventListener("click", () => {
+    playVoice(selected, ["kami", "shimo"], () => {
+      byId("catalog-audio-status").textContent = "おとが でないときは、もじで よんでね。";
+    }, randomVoice());
+  });
 
   function move(offset) {
     const index = matches[matches.indexOf(selected) + offset];

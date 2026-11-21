@@ -11,7 +11,8 @@ fi
 rustup target add wasm32-unknown-unknown
 cargo build --locked --release --lib --target wasm32-unknown-unknown
 mkdir -p dist
-cp web/index.html web/style.css web/app.js dist/
+cp web/index.html web/style.css web/app.js web/icon.svg web/favicon.ico web/manifest.webmanifest dist/
+cp -r web/icons dist/
 cp -r web/voice dist/
 mkdir -p dist/art
 for poem in {001..100}; do

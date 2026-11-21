@@ -16,4 +16,8 @@ mkdir -p dist/art
 for poem in {001..100}; do
   cp "web/art/${poem}.webp" dist/art/
 done
+mkdir -p dist/portraits
+for portrait in {01..16}; do
+  cp "web/portraits/${portrait}.webp" dist/portraits/
+done
 cp "${CARGO_TARGET_DIR:-target}/wasm32-unknown-unknown/release/hundred_waka.wasm" dist/

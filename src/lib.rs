@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 
 const POEMS: &str = include_str!("../data/poems.tsv");
+const CATALOG: &str = include_str!("../data/catalog.tsv");
 const COUNT: usize = 100;
 const ROUND_SIZE: usize = 10;
 
@@ -143,10 +144,35 @@ pub extern "C" fn poems_len() -> usize {
     POEMS.len()
 }
 
+#[no_mangle]
+pub extern "C" fn catalog_ptr() -> *const u8 {
+    CATALOG.as_ptr()
+}
+
+#[no_mangle]
+pub extern "C" fn catalog_len() -> usize {
+    CATALOG.len()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::collections::HashSet;
+
+    #[test]
+    fn every_poem_has_an_illustrated_catalog_entry() {
+        let mut names = HashSet::new();
+        assert_eq!(CATALOG.lines().count(), COUNT);
+        for row in CATALOG.lines() {
+            let columns: Vec<_> = row.split('\t').collect();
+            assert_eq!(columns.len(), 5);
+            assert!(columns.iter().all(|column| !column.trim().is_empty()));
+            assert!(names.insert(columns[0]));
+            assert_eq!(columns[2].len(), 2);
+            let art: usize = columns[2].parse().unwrap();
+            assert!((1..=16).contains(&art));
+        }
+    }
 
     #[test]
     fn corpus_has_unique_choices_in_both_writing_modes() {

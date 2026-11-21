@@ -19,11 +19,9 @@ ENGINE = "http://127.0.0.1:50021"
 ROOT = Path(__file__).resolve().parent.parent
 VOICES = {"zundamon": 3, "metan": 2, "tsumugi": 8}
 
-# かるたの読み: ゆっくり、抑揚を抑え、各句の終わりを長くのばして間を取る。
-SPEED = 0.82
-INTONATION = 0.35
-PHRASE_END = 0.62  # 句末の母音の長さ（秒）
-PHRASE_PAUSE = 0.55  # 句と句のあいだ（秒）
+# 聞き取りやすいよう、句ごとに少し間を取って、ややゆっくり普通に読む。
+SPEED = 0.9
+PHRASE_PAUSE = 0.45  # 句と句のあいだ（秒）
 
 
 def post(path, params, body=None):
@@ -34,7 +32,7 @@ def post(path, params, body=None):
         return response.read()
 
 
-def karuta_query(phrases, speaker):
+def reading_query(phrases, speaker):
     query = json.loads(post("/audio_query", {"text": "、".join(phrases), "speaker": speaker}))
     accents = query["accent_phrases"]
     # 読みどおりの「は」を、助詞と取り違えて「ワ」にした音を直す（いまはた、せをはやみ など）。
@@ -45,16 +43,11 @@ def karuta_query(phrases, speaker):
             if mora["text"] == "ワ" and want[position:position + 1] == "ハ":
                 mora.update(text="ハ", consonant="h", consonant_length=mora["consonant_length"] or 0.06)
             position += len(mora["text"])
-    # 「、」で区切られた句の終わりにあたるアクセント句を探す。
-    ends = [i for i, accent in enumerate(accents) if accent["pause_mora"]] + [len(accents) - 1]
-    for i in ends:
-        mora = accents[i]["moras"][-1]
-        mora["vowel_length"] = max(mora["vowel_length"], PHRASE_END)
-        if accents[i]["pause_mora"]:
-            accents[i]["pause_mora"]["vowel_length"] = PHRASE_PAUSE
+    for accent in accents:
+        if accent["pause_mora"]:
+            accent["pause_mora"]["vowel_length"] = PHRASE_PAUSE
     query.update(
         speedScale=SPEED,
-        intonationScale=INTONATION,
         prePhonemeLength=0.3,
         postPhonemeLength=0.6,
         outputSamplingRate=24000,
@@ -71,7 +64,7 @@ def main():
         out_dir.mkdir(parents=True, exist_ok=True)
         for number, (half, column) in ((n, h) for n in sorted(wanted) for h in (("kami", 2), ("shimo", 3))):
             phrases = poems[number - 1][column].split("　")
-            wav = post("/synthesis", {"speaker": speaker}, karuta_query(phrases, speaker))
+            wav = post("/synthesis", {"speaker": speaker}, reading_query(phrases, speaker))
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
                 tmp.write(wav)
             target = out_dir / f"{number:03}-{half}.mp3"
